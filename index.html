@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Profile — Test DISC</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f2f5; color: #1a1a2e; min-height: 100vh;
+    display: flex; justify-content: center; padding: 20px;
+  }
+  .container { max-width: 800px; width: 100%; }
+
+  /* Cards */
+  .card {
+    background: #fff; border-radius: 16px; padding: 40px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08); margin-bottom: 20px;
+  }
+  .card h1 { font-size: 28px; margin-bottom: 8px; }
+  .card h2 { font-size: 20px; margin-bottom: 20px; color: #555; font-weight: 500; }
+  .card p { color: #555; line-height: 1.6; margin-bottom: 16px; }
+
+  /* Welcome */
+  .welcome-icon {
+    width: 100px; height: 100px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px; font-size: 44px; font-weight: 700; color: #fff;
+    background: linear-gradient(135deg, #E74C3C, #F1C40F, #2ECC71, #3498DB);
+  }
+  .welcome-sub { text-align: center; color: #888; font-size: 14px; margin-top: 24px; }
+
+  /* Form */
+  label { display: block; margin-bottom: 6px; font-weight: 600; color: #333; }
+  input[type="text"] {
+    width: 100%; padding: 14px 16px; border: 2px solid #ddd; border-radius: 10px;
+    font-size: 16px; transition: border-color .2s;
+  }
+  input[type="text"]:focus { outline: none; border-color: #3498DB; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 32px; border: none; border-radius: 10px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: all .2s; text-decoration: none;
+  }
+  .btn-primary { background: #3498DB; color: #fff; touch-action: manipulation; }
+  .btn-primary:hover { background: #2980B9; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: #e8e8e8; color: #333; }
+  .btn-secondary:hover { background: #d5d5d5; }
+  .btn-success { background: #2ECC71; color: #fff; }
+  .btn-success:hover { background: #27AE60; transform: translateY(-1px); }
+  .text-center { text-align: center; }
+  .mt-4 { margin-top: 24px; }
+
+  /* Progress */
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-bar {
+    height: 8px; background: #e8e8e8; border-radius: 4px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, #3498DB, #2ECC71);
+    border-radius: 4px; transition: width .4s ease; width: 0%;
+  }
+  .progress-label {
+    display: flex; justify-content: space-between; font-size: 13px; color: #888; margin-top: 6px;
+  }
+
+  /* Section indicator */
+  .section-badge {
+    display: inline-block; padding: 4px 14px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; margin-bottom: 16px;
+  }
+  .badge-naturale { background: #e8f8f5; color: #1abc9c; }
+  .badge-adattato { background: #fef9e7; color: #f39c12; }
+
+  /* Questions */
+  .question {
+    padding: 16px 20px; border-radius: 12px; margin-bottom: 12px;
+    background: #fafafa; border-left: 4px solid transparent;
+    transition: background .2s;
+  }
+  .question:hover { background: #f0f4ff; }
+  .question.q-rosso { border-left-color: #E74C3C; }
+  .question.q-giallo { border-left-color: #F1C40F; }
+  .question.q-verde { border-left-color: #2ECC71; }
+  .question.q-blu { border-left-color: #3498DB; }
+  .question-text { font-size: 15px; margin-bottom: 10px; font-weight: 500; }
+  .question .dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px;
+  }
+  .dot-rosso { background: #E74C3C; }
+  .dot-giallo { background: #F1C40F; }
+  .dot-verde { background: #2ECC71; }
+  .dot-blu { background: #3498DB; }
+
+  .scale {
+    display: flex; gap: 0; border-radius: 8px; overflow: hidden;
+    border: 1px solid #e0e0e0;
+  }
+  .scale-option {
+    flex: 1; text-align: center; padding: 8px 4px; cursor: pointer;
+    font-size: 12px; color: #888; background: #fff;
+    transition: all .15s; border-right: 1px solid #e0e0e0; user-select: none;
+  }
+  .scale-option:last-child { border-right: none; }
+  .scale-option:hover { background: #f5f5f5; }
+  .scale-option.selected {
+    color: #fff; font-weight: 600;
+  }
+  .q-rosso .scale-option.selected { background: #E74C3C; }
+  .q-giallo .scale-option.selected { background: #D4AC0D; }
+  .q-verde .scale-option.selected { background: #27AE60; }
+  .q-blu .scale-option.selected { background: #2980B9; }
+
+  .scale-option .sublabel { display: block; font-size: 9px; opacity: .7; margin-top: 1px; }
+  .scale-option .val { font-weight: 700; font-size: 13px; }
+
+  /* Results */
+  .results-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px;
+  }
+  .result-card {
+    border-radius: 12px; padding: 20px; text-align: center; color: #fff;
+  }
+  .result-card .dim { font-size: 13px; opacity: .8; margin-bottom: 4px; }
+  .result-card .score { font-size: 32px; font-weight: 700; }
+  .result-card .subscore { font-size: 12px; opacity: .7; margin-top: 2px; }
+  .rc-rosso { background: linear-gradient(135deg, #E74C3C, #C0392B); }
+  .rc-giallo { background: linear-gradient(135deg, #F1C40F, #D4AC0D); }
+  .rc-verde { background: linear-gradient(135deg, #2ECC71, #27AE60); }
+  .rc-blu { background: linear-gradient(135deg, #3498DB, #2980B9); }
+
+  /* Chart */
+  #chartCanvas { width: 100%; max-width: 700px; height: 380px; display: block; margin: 0 auto 20px; }
+
+  /* Interpretation */
+  .interp-box {
+    padding: 20px; border-radius: 12px; margin-bottom: 16px; border-left: 5px solid;
+  }
+  .interp-box h4 { margin-bottom: 6px; }
+  .interp-box p { font-size: 14px; margin-bottom: 0; }
+  .interp-rosso { background: #fdedec; border-color: #E74C3C; }
+  .interp-giallo { background: #fef9e7; border-color: #F1C40F; }
+  .interp-verde { background: #e8f8f5; border-color: #2ECC71; }
+  .interp-blu { background: #ebf5fb; border-color: #3498DB; }
+
+  .interp-box .int-nat { font-size: 13px; color: #555; }
+  .interp-box .int-adatt { font-size: 13px; color: #555; }
+
+  /* Dominant */
+  .dominant-box {
+    text-align: center; padding: 24px; border-radius: 12px; margin-bottom: 20px;
+    border: 2px dashed #ccc;
+  }
+  .dominant-box .d-title { font-size: 14px; color: #888; margin-bottom: 8px; }
+  .dominant-box .d-color {
+    display: inline-block; padding: 8px 24px; border-radius: 8px;
+    font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px;
+  }
+
+  /* Screens */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Footer */
+  .footer-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 24px; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .card { padding: 24px 16px; }
+    .results-grid { grid-template-columns: 1fr; }
+    .scale { flex-wrap: nowrap; }
+    .scale-option { font-size: 10px; padding: 8px 2px; }
+    #chartCanvas { height: 280px; }
+    .welcome-icon { width: 72px; height: 72px; font-size: 32px; }
+  }
+
+  /* Print */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+    .btn, .footer-actions .btn { display: none; }
+    #screen-welcome, #screen-questions { display: none !important; }
+    #screen-results { display: block !important; }
+  }
+
+  /* Hidden utility */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ==================== WELCOME ==================== -->
+<div id="screen-welcome" class="screen active">
+  <div class="card text-center">
+    <div class="welcome-icon">NP</div>
+    <h1>Nova Profile</h1>
+    <h2>Scopri il tuo profilo comportamentale</h2>
+    <p>
+      Questo questionario ti aiuterà a identificare il tuo stile comportamentale
+      naturale e adattato basato sul modello DISC (Rosso, Giallo, Verde, Blu).
+    </p>
+    <p style="font-size:14px;color:#888;">
+      ⏱ circa 15 minuti · 44 affermazioni · scala "Mai" → "Sempre"
+    </p>
+    <div style="max-width:320px;margin:20px auto;">
+      <label for="nameInput">Il tuo nome (opzionale)</label>
+      <input type="text" id="nameInput" placeholder="Inserisci il tuo nome..." autocomplete="off">
+      <button type="button" class="btn btn-primary" id="btnStart" style="margin-top:12px;">Inizia il test →</button>
+    </div>
+    <div class="welcome-sub">
+      Il test misura due dimensioni:<br>
+      <strong>Naturale</strong> (come sei veramente) e <strong>Adattato</strong> (come ti comporti)
+    </div>
+  </div>
+</div>
+
+<!-- ==================== QUESTIONS ==================== -->
+<div id="screen-questions" class="screen">
+  <div class="card">
+    <div class="section-badge" id="sectionBadge">Naturale</div>
+    <h2 id="sectionTitle">Il tuo stile naturale</h2>
+    <p id="sectionDesc" style="font-size:14px;color:#888;margin-bottom:16px;">
+      Rispondi pensando a come sei <strong>realmente</strong>, senza filtri né condizionamenti esterni.
+    </p>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label">
+        <span id="progressText">0 / 44</span>
+        <span id="progressPct">0%</span>
+      </div>
+    </div>
+
+    <div id="questionsContainer"></div>
+
+    <div class="text-center mt-4">
+      <button class="btn btn-success" id="btnNext">Continua →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== RESULTS ==================== -->
+<div id="screen-results" class="screen">
+  <div class="card text-center">
+    <h1 style="font-size:24px;">Il tuo profilo</h1>
+    <h2 id="resultName" style="font-size:16px;color:#888;margin-bottom:24px;"></h2>
+
+    <div class="results-grid" id="resultsGrid"></div>
+
+    <div class="dominant-box" id="dominantBox"></div>
+
+    <canvas id="chartCanvas"></canvas>
+
+    <div id="interpretations"></div>
+
+    <div class="footer-actions">
+      <button class="btn btn-primary" onclick="window.print()">🖨 Stampa / PDF</button>
+      <button class="btn btn-secondary" onclick="ricomincia()">🔁 Ricomincia</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+// =====================================================================
+// CONFIGURAZIONE — modifica questo array per personalizzare le domande
+// =====================================================================
+const DOMANDE = [
+  // Rosso (D - Dominance)
+  { id: 1,  text: "Prendo decisioni rapidamente", color: "rosso" },
+  { id: 5,  text: "Mi piace guidare e dirigere gli altri", color: "rosso" },
+  { id: 9,  text: "Sono una persona competitiva", color: "rosso" },
+  { id: 13, text: "Mi assumo rischi volentieri", color: "rosso" },
+  { id: 17, text: "Ho bisogno di risultati concreti", color: "rosso" },
+  { id: 21, text: "Preferisco avere il controllo della situazione", color: "rosso" },
+  { id: 25, text: "Sono diretto/a e schietto/a", color: "rosso" },
+  { id: 29, text: "Affronto le sfide con determinazione", color: "rosso" },
+  { id: 33, text: "Non ho paura del conflitto", color: "rosso" },
+  { id: 37, text: "Sono orientato/a agli obiettivi", color: "rosso" },
+  { id: 41, text: "Preferisco agire piuttosto che riflettere troppo", color: "rosso" },
+  // Giallo (I - Influence)
+  { id: 2,  text: "Sono una persona socievole", color: "giallo" },
+  { id: 6,  text: "Mi entusiasmo facilmente per le novità", color: "giallo" },
+  { id: 10, text: "Sono creativo/a e innovativo/a", color: "giallo" },
+  { id: 14, text: "Mi piace stare al centro dell'attenzione", color: "giallo" },
+  { id: 18, text: "Sono ottimista e positivo/a", color: "giallo" },
+  { id: 22, text: "Mi piace collaborare con gli altri", color: "giallo" },
+  { id: 26, text: "Sono bravo/a a convincere le persone", color: "giallo" },
+  { id: 30, text: "Ho bisogno di varietà nella mia giornata", color: "giallo" },
+  { id: 34, text: "Sono espressivo/a nel comunicare", color: "giallo" },
+  { id: 38, text: "Mi piace sperimentare cose nuove", color: "giallo" },
+  { id: 42, text: "Trascino gli altri con il mio entusiasmo", color: "giallo" },
+  // Verde (S - Steadiness)
+  { id: 3,  text: "Sono una persona paziente", color: "verde" },
+  { id: 7,  text: "Preferisco la stabilità al cambiamento", color: "verde" },
+  { id: 11, text: "Ascolto attentamente gli altri", color: "verde" },
+  { id: 15, text: "Mi piace lavorare in un ambiente armonioso", color: "verde" },
+  { id: 19, text: "Sono leale e affidabile", color: "verde" },
+  { id: 23, text: "Ho bisogno di tempo per adattarmi ai cambiamenti", color: "verde" },
+  { id: 27, text: "Sono un buon mediatore nei conflitti", color: "verde" },
+  { id: 31, text: "Preferisco routine consolidate", color: "verde" },
+  { id: 35, text: "Metto le relazioni prima dei risultati", color: "verde" },
+  { id: 39, text: "Sono calmo/a anche sotto pressione", color: "verde" },
+  { id: 43, text: "Sono empatico/a verso gli altri", color: "verde" },
+  // Blu (C - Compliance)
+  { id: 4,  text: "Sono attento/a ai dettagli", color: "blu" },
+  { id: 8,  text: "Seguo le regole e le procedure", color: "blu" },
+  { id: 12, text: "Analizzo i dati prima di decidere", color: "blu" },
+  { id: 16, text: "Sono preciso/a e accurato/a", color: "blu" },
+  { id: 20, text: "Preferisco la qualità alla quantità", color: "blu" },
+  { id: 24, text: "Pianifico attentamente le mie attività", color: "blu" },
+  { id: 28, text: "Sono metodico/a nel lavoro", color: "blu" },
+  { id: 32, text: "Mi infastidiscono gli errori", color: "blu" },
+  { id: 36, text: "Sono razionale e logico/a", color: "blu" },
+  { id: 40, text: "Rispetto le scadenze scrupolosamente", color: "blu" },
+  { id: 44, text: "Verifico più volte prima di consegnare un lavoro", color: "blu" },
+];
+
+const SCALE = [
+  { value: 0, label: "Mai", sub: "Mai" },
+  { value: 1, label: "Raramente", sub: "Raramente" },
+  { value: 2, label: "A volte", sub: "A volte" },
+  { value: 3, label: "Spesso", sub: "Spesso" },
+  { value: 4, label: "Sempre", sub: "Sempre" },
+];
+
+const COLORI = {
+  rosso:  { hex: "#E74C3C", bg: "#fdedec", nome: "Rosso",    tratto: "Determinazione, pragmatismo, orientamento ai risultati" },
+  giallo: { hex: "#F1C40F", bg: "#fef9e7", nome: "Giallo",   tratto: "Entusiasmo, creatività, orientamento alle persone" },
+  verde:  { hex: "#2ECC71", bg: "#e8f8f5", nome: "Verde",    tratto: "Pazienza, affidabilità, orientamento alla stabilità" },
+  blu:    { hex: "#3498DB", bg: "#ebf5fb", nome: "Blu",      tratto: "Precisione, analisi, orientamento alla qualità" },
+};
+
+const MAX_RAW = 11 * 4; // 11 domande × 4 (Sempre)
+
+// =====================================================================
+// STATO
+// =====================================================================
+let state = {
+  name: "",
+  section: "naturale", // 'naturale' | 'adattato'
+  answers: { naturale: {}, adattato: {} },
+};
+
+// =====================================================================
+// DOM REFS
+// =====================================================================
+const $ = id => document.getElementById(id);
+const screens = {
+  welcome:  $("screen-welcome"),
+  questions: $("screen-questions"),
+  results:   $("screen-results"),
+};
+
+// =====================================================================
+// FUNCTIONS
+// =====================================================================
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function normalizza(raw) {
+  return Math.round((raw / MAX_RAW) * 100);
+}
+
+function calcola(colore, tipo) {
+  const ans = state.answers[tipo];
+  let tot = 0;
+  DOMANDE.forEach(q => {
+    if (q.color === colore && ans[q.id] !== undefined) {
+      tot += ans[q.id];
+    }
+  });
+  return normalizza(tot);
+}
+
+function getPunteggi() {
+  const colori = ["rosso","giallo","verde","blu"];
+  const res = {};
+  colori.forEach(c => {
+    res[c] = {
+      naturale: calcola(c, "naturale"),
+      adattato: calcola(c, "adattato"),
+    };
+  });
+  return res;
+}
+
+function getColoreDominante(punteggi) {
+  let max = -1, col = "rosso";
+  Object.entries(punteggi).forEach(([c, p]) => {
+    const avg = (p.naturale + p.adattato) / 2;
+    if (avg > max) { max = avg; col = c; }
+  });
+  return col;
+}
+
+// =====================================================================
+// RENDER WELCOME
+// =====================================================================
+$("btnStart").addEventListener("pointerdown", avviaTest);
+$("nameInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") avviaTest();
+});
+
+function avviaTest() {
+  state.name = $("nameInput").value.trim() || "Anonimo";
+  state.section = "naturale";
+  state.answers = { naturale: {}, adattato: {} };
+  setTimeout(function() {
+    mostraSchermata("questions");
+    renderQuestionario();
+  }, 300);
+}
+
+// =====================================================================
+// RENDER QUESTIONARIO
+// =====================================================================
+function renderQuestionario() {
+  const container = $("questionsContainer");
+  container.innerHTML = "";
+
+  const isNat = state.section === "naturale";
+  $("sectionBadge").textContent = isNat ? "🌿 Stile Naturale" : "🔄 Stile Adattato";
+  $("sectionBadge").className = "section-badge " + (isNat ? "badge-naturale" : "badge-adattato");
+  $("sectionTitle").textContent = isNat
+    ? "Parte 1 — Il tuo stile naturale"
+    : "Parte 2 — Il tuo stile adattato";
+  $("sectionDesc").innerHTML = isNat
+    ? 'Rispondi pensando a come sei <strong>realmente</strong>, senza filtri né condizionamenti esterni.'
+    : 'Ora rispondi pensando a come ti <strong>comporti abitualmente</strong> nella vita quotidiana / lavorativa.';
+
+  // Use interleaved order: R,G,V,B,R,G,V,B...
+  const interleaved = [];
+  const perColor = DOMANDE.filter(q => q.color === "rosso").length;
+  for (let i = 0; i < perColor; i++) {
+    ["rosso","giallo","verde","blu"].forEach(c => {
+      const qs = DOMANDE.filter(q => q.color === c);
+      if (i < qs.length) interleaved.push(qs[i]);
+    });
+  }
+
+  interleaved.forEach((q, idx) => {
+    const div = document.createElement("div");
+    div.className = `question q-${q.color}`;
+
+    const currentVal = state.answers[state.section][q.id];
+    const dotClass = `dot dot-${q.color}`;
+
+    div.innerHTML = `
+      <div class="question-text">
+        <span class="${dotClass}"></span>
+        <span>${idx + 1}. ${q.text}</span>
+      </div>
+      <div class="scale" data-qid="${q.id}" data-color="${q.color}">
+        ${SCALE.map(s => `
+          <div class="scale-option ${currentVal === s.value ? 'selected' : ''}"
+               data-value="${s.value}"
+               role="button" tabindex="0">
+            <span class="val">${s.label.charAt(0)}</span>
+            <span class="sublabel">${s.label === "Mai" ? "Mai" : s.label === "Raramente" ? "Rar." : s.label === "A volte" ? "Talv." : s.label === "Spesso" ? "Spes." : "Sempre"}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+
+  // Attach click listeners to scale options
+  container.querySelectorAll(".scale-option").forEach(el => {
+    el.addEventListener("click", function() {
+      const scale = this.closest(".scale");
+      const qid = parseInt(scale.dataset.qid);
+      const value = parseInt(this.dataset.value);
+
+      // Deselect siblings
+      scale.querySelectorAll(".scale-option").forEach(opt => opt.classList.remove("selected"));
+      this.classList.add("selected");
+
+      state.answers[state.section][qid] = value;
+      aggiornaProgresso();
+    });
+  });
+
+  // Enable/disable button
+  aggiornaProgresso();
+}
+
+function aggiornaProgresso() {
+  const answered = Object.keys(state.answers[state.section]).length;
+  const total = DOMANDE.length;
+  const pct = Math.round((answered / total) * 100);
+
+  $("progressFill").style.width = pct + "%";
+  $("progressText").textContent = answered + " / " + total;
+  $("progressPct").textContent = answered === total ? "✅ Completo" : pct + "%";
+
+  const btn = $("btnNext");
+  if (answered === total) {
+    btn.disabled = false;
+    btn.textContent = state.section === "naturale" ? "Passa alla Parte 2 →" : "🎯 Vedi il tuo profilo!";
+  } else {
+    btn.disabled = true;
+    btn.textContent = "Rispondi a tutte le domande (" + (total - answered) + " rimaste)";
+  }
+}
+
+$("btnNext").addEventListener("click", function() {
+  if (this.disabled) return;
+  if (state.section === "naturale") {
+    state.section = "adattato";
+    renderQuestionario();
+    window.scrollTo(0, 0);
+  } else {
+    mostraRisultati();
+  }
+});
+
+// =====================================================================
+// RISULTATI
+// =====================================================================
+function mostraRisultati() {
+  mostraSchermata("results");
+  const p = getPunteggi();
+  const dom = getColoreDominante(p);
+  const cDom = COLORI[dom];
+
+  $("resultName").textContent = "di " + state.name;
+
+  // Result cards
+  const grid = $("resultsGrid");
+  grid.innerHTML = "";
+  Object.entries(p).forEach(([col, scores]) => {
+    const c = COLORI[col];
+    const div = document.createElement("div");
+    div.className = `result-card rc-${col}`;
+    div.innerHTML = `
+      <div class="dim">${c.nome}</div>
+      <div class="score">${scores.naturale}</div>
+      <div class="subscore">Naturale</div>
+      <hr style="opacity:.2;margin:8px 0;">
+      <div class="score">${scores.adattato}</div>
+      <div class="subscore">Adattato</div>
+    `;
+    grid.appendChild(div);
+  });
+
+  // Dominant
+  const db = $("dominantBox");
+  db.innerHTML = `
+    <div class="d-title">🎨 Colore dominante</div>
+    <div class="d-color" style="background:${cDom.hex}">${cDom.nome}</div>
+    <div style="font-size:14px;color:#888;">${cDom.tratto}</div>
+  `;
+
+  // Chart
+  disegnaGrafico(p);
+
+  // Interpretations
+  const interp = $("interpretations");
+  interp.innerHTML = "<h3 style='margin-bottom:16px;'>Dettaglio per dimensione</h3>";
+  Object.entries(p).forEach(([col, scores]) => {
+    const c = COLORI[col];
+    const diff = scores.adattato - scores.naturale;
+    const diffText = diff > 5
+      ? `📈 Aumento di ${diff} punti — stai esprimendo più ${c.nome.toLowerCase()} di quanto non sia naturale per te.`
+      : diff < -5
+        ? `📉 Calo di ${Math.abs(diff)} punti — stai contenendo il tuo ${c.nome.toLowerCase()} naturale.`
+        : `➡️ Sostanzialmente stabile — il tuo ${c.nome.toLowerCase()} è allineato.`;
+
+    const box = document.createElement("div");
+    box.className = `interp-box interp-${col}`;
+    box.innerHTML = `
+      <h4 style="color:${c.hex}">${c.nome} — ${c.tratto}</h4>
+      <p class="int-nat"><strong>Naturale:</strong> ${scores.naturale}/100 · <strong>Adattato:</strong> ${scores.adattato}/100</p>
+      <p>${diffText}</p>
+    `;
+    interp.appendChild(box);
+  });
+}
+
+// =====================================================================
+// GRAFICO CANVAS
+// =====================================================================
+function disegnaGrafico(punteggi) {
+  const canvas = $("chartCanvas");
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = Math.min(rect.width - 40, 700);
+  const H = 380;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const LABELS = ["Rosso","Giallo","Verde","Blu"];
+  const coloriArr = ["rosso","giallo","verde","blu"];
+  const colors = [COLORI.rosso.hex, COLORI.giallo.hex, COLORI.verde.hex, COLORI.blu.hex];
+
+  const margin = { top: 30, bottom: 50, left: 50, right: 30 };
+  const chartW = W - margin.left - margin.right;
+  const chartH = H - margin.top - margin.bottom;
+  const groupW = chartW / 4;
+  const barW = groupW * 0.3;
+  const gap = groupW * 0.05;
+
+  // Title
+  ctx.fillStyle = "#333";
+  ctx.font = "14px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Punteggi Naturale vs Adattato", W / 2, 18);
+
+  // Y axis
+  ctx.strokeStyle = "#ddd";
+  ctx.lineWidth = 1;
+  ctx.fillStyle = "#999";
+  ctx.font = "11px -apple-system, sans-serif";
+  ctx.textAlign = "right";
+
+  for (let y = 0; y <= 100; y += 20) {
+    const yPos = margin.top + chartH - (y / 100) * chartH;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, yPos);
+    ctx.lineTo(W - margin.right, yPos);
+    ctx.stroke();
+    ctx.fillText(y, margin.left - 8, yPos + 4);
+  }
+
+  // Bars
+  LABELS.forEach((label, i) => {
+    const cx = margin.left + i * groupW + groupW / 2;
+    const p = punteggi[coloriArr[i]];
+    const natH = (p.naturale / 100) * chartH;
+    const adaH = (p.adattato / 100) * chartH;
+
+    const x1 = cx - barW - gap / 2;
+    const x2 = cx + gap / 2;
+    const yBase = margin.top + chartH;
+
+    // Naturale bar
+    ctx.fillStyle = colors[i] + "CC";
+    ctx.beginPath();
+    ctx.roundRect(x1, yBase - natH, barW, natH, [4, 4, 0, 0]);
+    ctx.fill();
+
+    // Adattato bar
+    ctx.fillStyle = colors[i] + "88";
+    ctx.beginPath();
+    ctx.roundRect(x2, yBase - adaH, barW, adaH, [4, 4, 0, 0]);
+    ctx.fill();
+
+    // Labels
+    ctx.fillStyle = "#333";
+    ctx.font = "13px -apple-system, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(label, cx, yBase + 18);
+
+    // Values on top of bars
+    ctx.font = "11px -apple-system, sans-serif";
+    if (natH > 0) {
+      ctx.fillStyle = "#333";
+      ctx.textAlign = "center";
+      ctx.fillText(p.naturale, x1 + barW / 2, yBase - natH - 6);
+    }
+    if (adaH > 0) {
+      ctx.fillStyle = "#666";
+      ctx.textAlign = "center";
+      ctx.fillText(p.adattato, x2 + barW / 2, yBase - adaH - 6);
+    }
+  });
+
+  // Legend
+  ctx.font = "11px -apple-system, sans-serif";
+  ctx.textAlign = "left";
+  const legY = H - 6;
+  ctx.fillStyle = "#333";
+  ctx.fillRect(W / 2 - 80, legY - 8, 10, 10);
+  ctx.fillText("Naturale", W / 2 - 65, legY + 3);
+  ctx.fillStyle = "#999";
+  ctx.fillRect(W / 2 + 10, legY - 8, 10, 10);
+  ctx.fillText("Adattato", W / 2 + 25, legY + 3);
+}
+
+// roundRect polyfill for canvas
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
+    const r = Array.isArray(radii) ? radii : [radii, radii, radii, radii];
+    const [tl, tr, br, bl] = r.map(v => Math.min(v || 0, Math.min(w, h) / 2));
+    this.moveTo(x + tl, y);
+    this.lineTo(x + w - tr, y);
+    this.quadraticCurveTo(x + w, y, x + w, y + tr);
+    this.lineTo(x + w, y + h - br);
+    this.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+    this.lineTo(x + bl, y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - bl);
+    this.lineTo(x, y + tl);
+    this.quadraticCurveTo(x, y, x + tl, y);
+    this.closePath();
+    return this;
+  };
+}
+
+// =====================================================================
+// NAVIGATION
+// =====================================================================
+function mostraSchermata(nome) {
+  Object.keys(screens).forEach(k => {
+    screens[k].classList.toggle("active", k === nome);
+  });
+}
+
+function ricomincia() {
+  state.answers = { naturale: {}, adattato: {} };
+  state.section = "naturale";
+  mostraSchermata("welcome");
+  $("nameInput").value = state.name;
+  $("nameInput").focus();
+}
+
+// Redraw chart on resize
+let resizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (screens.results.classList.contains("active")) {
+      const p = getPunteggi();
+      disegnaGrafico(p);
+    }
+  }, 300);
+});
+</script>
+</body>
+</html>
